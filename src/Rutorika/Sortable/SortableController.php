@@ -83,11 +83,8 @@ class SortableController extends Controller
             'action' => $bag->action ?? null,
             'request' => $bag->request ?? null,
             'variation' => $bag->variation ?? null,]);
-        // dd($bag);
-        // dd($bag);
         $message=json_encode($bag).'Your delivery sir!';
         Redis::publish('pand0ra', json_encode($bag));
-        //test
     }
 
     /**

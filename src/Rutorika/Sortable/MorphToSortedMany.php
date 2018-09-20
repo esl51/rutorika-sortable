@@ -22,19 +22,16 @@ class MorphToSortedMany extends MorphToMany
      * @param Model   $parent
      * @param string  $name
      * @param string  $table
-     * @param string  $foreignPivotKey
-     * @param string  $relatedPivotKey
-     * @param string  $parentKey
-     * @param string  $relatedKey
+     * @param string  $foreignKey
+     * @param string  $otherKey
      * @param string  $orderColumn
      * @param string  $relationName
      * @param bool    $inverse
      */
-    public function __construct(Builder $query, Model $parent, $name, $table, $foreignPivotKey,
-                                $relatedPivotKey, $parentKey, $relatedKey, $orderColumn, $relationName = null, $inverse = false)
+    public function __construct(Builder $query, Model $parent, $name, $table, $foreignKey, $otherKey, $orderColumn, $relationName = null, $inverse = false)
     {
-        parent::__construct($query, $parent, $name, $table, $foreignPivotKey,
-            $relatedPivotKey, $parentKey, $relatedKey, $relationName = null, $inverse);
+        parent::__construct($query, $parent, $name, $table, $foreignKey, $otherKey, $relationName, $inverse);
+
         $this->setOrderColumn($orderColumn);
     }
 }

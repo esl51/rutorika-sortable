@@ -22,17 +22,14 @@ class BelongsToSortedMany extends BelongsToMany
      * @param Builder $query
      * @param Model   $parent
      * @param string  $table
-     * @param string  $foreignPivotKey
-     * @param string  $relatedPivotKey
-     * @param string  $parentKey
-     * @param string  $relatedKey
+     * @param string  $foreignKey
+     * @param string  $otherKey
      * @param string  $relationName
-     * @param string  $orderColumn     position column name
+     * @param string  $orderColumn  position column name
      */
-    public function __construct(Builder $query, Model $parent, $table, $foreignPivotKey,
-                                $relatedPivotKey, $parentKey, $relatedKey, $relationName = null, $orderColumn = null)
+    public function __construct(Builder $query, Model $parent, $table, $foreignKey, $otherKey, $relationName = null, $orderColumn = null)
     {
-        parent::__construct($query, $parent, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relationName = null);
+        parent::__construct($query, $parent, $table, $foreignKey, $otherKey, $relationName);
 
         $this->setOrderColumn($orderColumn);
     }
@@ -44,6 +41,6 @@ class BelongsToSortedMany extends BelongsToMany
 
     public function getForeignKey()
     {
-        return $this->foreignPivotKey;
+        return $this->foreignKey;
     }
 }

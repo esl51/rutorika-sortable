@@ -5,6 +5,9 @@ namespace Rutorika\Sortable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class SortableController extends Controller
 {
@@ -15,9 +18,10 @@ class SortableController extends Controller
      */
     public function sort(Request $request)
     {
+        $bag= (object) array();
+        $session=new Session();
         $sortableEntities = app('config')->get('sortable.entities', []);
         $validator = $this->getValidator($sortableEntities, $request);
-
         if (!$validator->passes()) {
             return [
                 'success' => false,
@@ -42,7 +46,48 @@ class SortableController extends Controller
             $parentEntity->$relation()->$method($entity, $postionEntity);
         }
 
+        if($request->input('entityName')==='grouped_articles'){
+            $bag->value_change='casinos_list_properties';
+        }
+        if($request->input('entityName')==='grouped_articles1'){
+            $bag->value_change='slot_game_casino_order_list';
+        }
+        if($request->input('entityName')==='games1'){
+            $bag->value_change='slot_game_details';
+        }
+
+        if($request->input('entityName')==='games1'){
+            $bag->value_change='slot_game_details';
+        }
+        if($request->input('entityName')==='list_of_casinos_on_slots'){
+            $bag->value_change='slot_game_casino_order_list';
+        }
+
+        $bag->domain=$session->get('domain');
+        $bag->action='position_change';
+        //$bag->request=$request;
+        $bag->value_id=$request->input('id');
+        $this->get_update($bag);
+
         return ['success' => true];
+    }
+
+    public function get_update($bag){
+
+        DB::table('12_refactored.redis_updates')->insert(['domain_name' => $bag->domain,
+            'link' => $bag->link ?? null,
+            'value_change' => $bag->value_change ?? null,
+            'user_id' => null,
+            'value_id' => $bag->value_id ?? null,
+            'page_id' => $bag->page_id ?? null,
+            'action' => $bag->action ?? null,
+            'request' => $bag->request ?? null,
+            'variation' => $bag->variation ?? null,]);
+        // dd($bag);
+        // dd($bag);
+        $message=json_encode($bag).'Your delivery sir!';
+        Redis::publish('pand0ra', json_encode($bag));
+        //test
     }
 
     /**

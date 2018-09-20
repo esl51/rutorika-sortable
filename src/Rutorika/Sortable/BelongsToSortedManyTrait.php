@@ -10,41 +10,38 @@ namespace Rutorika\Sortable;
 trait BelongsToSortedManyTrait
 {
     /**
-     * Define a many-to-many relationship.
+     * Returns new BelongsToSortedMany relation.
      * Notice that signature of this method is different than ->belongsToMany: second param is pivot position column name.
      * Other params is the same as ->belongsToMany has.
      *
      * Just copy of belongsToMany except last line where we return new BelongsToSortedMany instance with additional orderColumn param
      *
-     * @param string $related
+     * @param        $related
      * @param string $orderColumn
      * @param string $table
-     * @param string $foreignPivotKey
-     * @param string $relatedPivotKey
-     * @param string $parentKey
-     * @param string $relatedKey
+     * @param string $foreignKey
+     * @param string $otherKey
      * @param string $relation
      *
      * @return BelongsToSortedMany
      */
-    public function belongsToSortedMany($related, $orderColumn = 'position', $table = null, $foreignPivotKey = null, $relatedPivotKey = null,
-                                  $parentKey = null, $relatedKey = null, $relation = null)
+    public function belongsToSortedMany($related, $orderColumn = 'position', $table = null, $foreignKey = null, $otherKey = null, $relation = null)
     {
         // If no relationship name was passed, we will pull backtraces to get the
         // name of the calling function. We will use that function name as the
         // title of this relation since that is a great convention to apply.
         if (is_null($relation)) {
-            $relation = $this->guessBelongsToManyRelation();
+            $relation = $this->getRelations();
         }
 
         // First, we'll need to determine the foreign key and "other key" for the
         // relationship. Once we have determined the keys we'll make the query
         // instances as well as the relationship instances we need for this.
-        $instance = $this->newRelatedInstance($related);
+        $foreignKey = $foreignKey ?: $this->getForeignKey();
 
-        $foreignPivotKey = $foreignPivotKey ?: $this->getForeignKey();
+        $instance = new $related();
 
-        $relatedPivotKey = $relatedPivotKey ?: $instance->getForeignKey();
+        $otherKey = $otherKey ?: $instance->getForeignKey();
 
         // If no table name was provided, we can guess it by concatenating the two
         // models using underscores in alphabetical order. The two model names
@@ -53,11 +50,12 @@ trait BelongsToSortedManyTrait
             $table = $this->joiningTable($related);
         }
 
-        return new BelongsToSortedMany(
-            $instance->newQuery(), $this, $table, $foreignPivotKey,
-            $relatedPivotKey, $parentKey ?: $this->getKeyName(),
-            $relatedKey ?: $instance->getKeyName(), $relation, $orderColumn
-        );
+        // Now we're ready to create a new query builder for the related model and
+        // the relationship instances for the relation. The relations will set
+        // appropriate query constraint and entirely manages the hydrations.
+        $query = $instance->newQuery();
+
+        return new BelongsToSortedMany($query, $this, $table, $foreignKey, $otherKey, $relation, $orderColumn);
     }
 
     /**
@@ -82,27 +80,4 @@ trait BelongsToSortedManyTrait
      * @return string
      */
     abstract protected function getRelations();
-
-    /**
-     * Get the relationship name of the belongs to many.
-     *
-     * @return string
-     */
-    abstract protected function guessBelongsToManyRelation();
-
-    /**
-     * Create a new model instance for a related model.
-     *
-     * @param string $class
-     *
-     * @return mixed
-     */
-    abstract protected function newRelatedInstance($class);
-
-    /**
-     * Get the primary key for the model.
-     *
-     * @return string
-     */
-    abstract public function getKeyName();
 }
